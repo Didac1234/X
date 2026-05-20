@@ -368,8 +368,32 @@
     </main>
 
     <script>
+      // Configuració Supabase: substitueix aquests valors amb els teus del projecte Supabase
+      const useSupabase = true;
+      const SUPABASE_URL = "https://udpiihvoohushrkfnvqy.supabase.co";
+      const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVkcGlpaHZvb2h1c2hya2ZudnF5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYzNDEwNzUsImV4cCI6MjA5MTkxNzA3NX0.tes2oOyZFyMNVix2UxKCiJrEXmW8zsy5nL1fN-1H5dQ";
+      let sb = null;
+
+      async function inicialitzarSupabase() {
+        if (!useSupabase) return;
+
+        if (typeof supabase !== "undefined") {
+          sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+          return;
+        }
+
+        try {
+          const module = await import("https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm");
+          if (module?.createClient) {
+            sb = module.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+          }
+        } catch (error) {
+          console.error("No s'ha pogut carregar Supabase:", error);
+        }
+      }
+
       // "Base de dades" simulada en memòria local
-      const respostes = [
+      let respostes = [
         { id: 1, grup: "DAW1A", puntuacio: 4, comentari: "Sessió clara i pràctica.", data: "2026-04-08T09:15:00" },
         { id: 2, grup: "DAW1B", puntuacio: 5, comentari: "Molt útil per preparar el projecte.", data: "2026-04-08T10:40:00" },
         { id: 3, grup: "ASIX1", puntuacio: 3, comentari: "Faltava més temps per practicar.", data: "2026-04-08T11:05:00" },
@@ -407,6 +431,28 @@
         { id: 35, grup: "DAW1B", puntuacio: 2, comentari: "Necessito repassar la base.", data: "2026-04-09T17:12:00" },
         { id: 36, grup: "ASIX1", puntuacio: 4, comentari: "Bon equilibri entre eines i teoria.", data: "2026-04-09T17:30:00" }
       ];
+
+      async function carregarRespostes() {
+        if (!sb) return;
+
+        const { data, error } = await sb
+          .from("respostes")
+          .select("id, grup, puntuacio, comentari, data")
+          .order("data", { ascending: false });
+
+        if (error) {
+          console.error("Supabase load error:", error);
+          elMissatgeError.textContent = "Error de connexió amb Supabase. Usant dades locals.";
+          return;
+        }
+
+        respostes = data.map((r) => ({
+          ...r,
+          puntuacio: Number(r.puntuacio),
+          comentari: r.comentari ?? "",
+          data: new Date(r.data).toISOString()
+        }));
+      }
 
       const $ = (s) => document.querySelector(s);
       const elGrup = $("#grup");
@@ -629,17 +675,36 @@
         renderLlistat();
       }
 
-      function afegirResposta() {
+      async function afegirResposta() {
         if (!validarFormulari()) return;
 
         const nova = {
-          id: respostes.length + 1,
           grup: elGrup.value,
           puntuacio: Number(elPuntuacio.value),
           comentari: elComentari.value.trim(),
           data: new Date().toISOString()
         };
-        respostes.push(nova);
+
+        if (sb) {
+          const { data, error } = await sb.from("respostes").insert([nova]).select();
+          if (error) {
+            console.error("Supabase insert error:", error);
+            mostrarMissatge("No s'ha pogut desar a Supabase. Torna-ho a intentar.");
+            return;
+          }
+          if (data?.[0]) {
+            respostes.unshift({
+              ...data[0],
+              puntuacio: Number(data[0].puntuacio),
+              comentari: data[0].comentari ?? "",
+              data: new Date(data[0].data).toISOString()
+            });
+          }
+        } else {
+          nova.id = respostes.length + 1;
+          respostes.unshift(nova);
+        }
+
         elComentari.value = "";
         render();
         mostrarMissatge("Resposta guardada correctament.", "success");
@@ -653,9 +718,14 @@
       });
       elFiltreGrup.addEventListener("change", render);
 
-      elFiltreGrup.value = elGrup.value;
+      async function init() {
+        await inicialitzarSupabase();
+        await carregarRespostes();
+        elFiltreGrup.value = elGrup.value;
+        render();
+      }
 
-      render();
+      init();
     </script>
   </body>
 </html>

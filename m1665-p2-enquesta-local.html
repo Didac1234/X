@@ -1,0 +1,640 @@
+<!doctype html>
+<html lang="ca">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>M1665 P2 - Enquesta local (arrays)</title>
+    <style>
+      :root {
+        --bg: #f5f7fb;
+        --card: #ffffff;
+        --text: #1f2937;
+        --muted: #6b7280;
+        --primary: #2563eb;
+        --ok: #16a34a;
+        --warn: #f59e0b;
+        --danger: #ef4444;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        font-family: Arial, sans-serif;
+        background: var(--bg);
+        color: var(--text);
+      }
+
+      .page {
+        max-width: 1200px;
+        margin: 24px auto;
+        padding: 0 16px;
+      }
+
+      h1 {
+        margin: 0 0 8px;
+      }
+
+      .subtitle {
+        margin: 0 0 18px;
+        color: var(--muted);
+      }
+
+      .layout {
+        display: grid;
+        grid-template-columns: 360px 1fr;
+        gap: 16px;
+      }
+
+      .card {
+        background: var(--card);
+        border-radius: 10px;
+        padding: 16px;
+        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.06);
+      }
+
+      .field {
+        margin-bottom: 12px;
+      }
+
+      label {
+        display: block;
+        margin-bottom: 6px;
+        font-weight: 700;
+      }
+
+      input,
+      select,
+      textarea,
+      button {
+        width: 100%;
+        border-radius: 8px;
+        border: 1px solid #d1d5db;
+        padding: 10px 12px;
+        font-size: 14px;
+        font-family: inherit;
+      }
+
+      textarea {
+        resize: vertical;
+        min-height: 84px;
+      }
+
+      button {
+        background: var(--primary);
+        color: #fff;
+        border: 0;
+        font-weight: 700;
+        cursor: pointer;
+      }
+
+      button:hover {
+        filter: brightness(0.95);
+      }
+
+      .message {
+        min-height: 20px;
+        margin-top: -4px;
+        margin-bottom: 8px;
+        color: var(--danger);
+        font-size: 13px;
+        font-weight: 700;
+      }
+
+      .stats {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(120px, 1fr));
+        gap: 10px;
+        margin-bottom: 14px;
+      }
+
+      .stat {
+        background: #f9fafb;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        padding: 10px;
+      }
+
+      .stat strong {
+        display: block;
+        font-size: 20px;
+      }
+
+      .muted {
+        color: var(--muted);
+        font-size: 13px;
+      }
+
+      .chart-row {
+        margin-bottom: 8px;
+      }
+
+      .chart-label {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 4px;
+        font-size: 13px;
+      }
+
+      .bar {
+        width: 100%;
+        height: 12px;
+        background: #e5e7eb;
+        border-radius: 999px;
+        overflow: hidden;
+      }
+
+      .bar > span {
+        display: block;
+        height: 100%;
+        background: linear-gradient(90deg, #60a5fa, #2563eb);
+      }
+
+      .pies {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(220px, 1fr));
+        gap: 14px;
+        margin: 10px 0 14px;
+      }
+
+      .pie-card {
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        padding: 10px;
+        background: #fff;
+      }
+
+      .pie-wrap {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .pie {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        background: #e5e7eb;
+        flex: 0 0 auto;
+      }
+
+      .legend {
+        display: grid;
+        gap: 6px;
+      }
+
+      .legend-item {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 13px;
+      }
+
+      .dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        display: inline-block;
+      }
+
+      .list {
+        display: grid;
+        gap: 8px;
+        margin-top: 14px;
+      }
+
+      .item {
+        border: 1px solid #e5e7eb;
+        border-left: 4px solid #93c5fd;
+        border-radius: 8px;
+        padding: 10px;
+        background: #fff;
+      }
+
+      .item.score-1 {
+        border-left-color: #ef4444;
+        background: #fef2f2;
+      }
+
+      .item.score-2 {
+        border-left-color: #f97316;
+        background: #fff7ed;
+      }
+
+      .item.score-3 {
+        border-left-color: #f59e0b;
+        background: #fffbeb;
+      }
+
+      .item.score-4 {
+        border-left-color: #22c55e;
+        background: #f0fdf4;
+      }
+
+      .item.score-5 {
+        border-left-color: #16a34a;
+        background: #dcfce7;
+      }
+
+      .item p {
+        margin: 4px 0 0;
+      }
+
+      .pill {
+        display: inline-block;
+        border-radius: 999px;
+        padding: 2px 8px;
+        font-size: 12px;
+        font-weight: 700;
+      }
+
+      .pill.a {
+        background: #dbeafe;
+        color: #1d4ed8;
+      }
+
+      .pill.b {
+        background: #dcfce7;
+        color: #166534;
+      }
+
+      .pill.c {
+        background: #fef3c7;
+        color: #92400e;
+      }
+
+      @media (max-width: 980px) {
+        .layout {
+          grid-template-columns: 1fr;
+        }
+
+        .stats {
+          grid-template-columns: repeat(2, minmax(120px, 1fr));
+        }
+
+        .pies {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="page">
+      <h1>M1665 - Projecte 2 (v0 local amb arrays)</h1>
+      <p class="subtitle">
+        Prototip inicial amb "BD simulada" en memòria. Punt de partida per evolucionar cap a Supabase + Vercel.
+      </p>
+
+      <div class="layout">
+        <section class="card">
+          <h2>Formulari d'enquesta</h2>
+          <div class="field">
+            <label for="grup">Grup</label>
+            <select id="grup">
+              <option value="DAW1A">DAW1A</option>
+              <option value="DAW1B">DAW1B</option>
+              <option value="ASIX1">ASIX1</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label for="puntuacio">Satisfacció global (1-5)</label>
+            <input id="puntuacio" type="number" min="1" max="5" value="4" />
+          </div>
+
+          <div class="field">
+            <label for="comentari">Comentari (opcional)</label>
+            <textarea id="comentari" placeholder="Què milloraries de la sessió?"></textarea>
+          </div>
+
+          <div id="missatgeError" class="message"></div>
+          <button id="btnAfegir" type="button">Guardar resposta</button>
+        </section>
+
+        <section class="card">
+          <h2>Panell d'analítica</h2>
+          <div class="field">
+            <label for="filtreGrup">Filtre del panell</label>
+            <select id="filtreGrup">
+              <option value="TOTS">Tots els grups</option>
+              <option value="DAW1A">DAW1A</option>
+              <option value="DAW1B">DAW1B</option>
+              <option value="ASIX1">ASIX1</option>
+            </select>
+          </div>
+          <p class="muted">Mostrant dades del grup seleccionat al formulari: <strong id="grupActiu">-</strong></p>
+
+          <div class="stats">
+            <div class="stat"><span class="muted">Respostes</span><strong id="kpiTotal">0</strong></div>
+            <div class="stat"><span class="muted">Mitjana</span><strong id="kpiMitjana">0.0</strong></div>
+            <div class="stat"><span class="muted">% 4 o 5</span><strong id="kpiPositives">0%</strong></div>
+            <div class="stat"><span class="muted">Grup analitzat</span><strong id="kpiTopGrup">-</strong></div>
+          </div>
+
+          <h3>Distribució de valoracions</h3>
+          <div id="grafDistribucio"></div>
+
+          <h3>Gràfics de quesito</h3>
+          <div class="pies">
+            <div class="pie-card">
+              <p class="muted">Quesito de puntuacions</p>
+              <div class="pie-wrap">
+                <div id="piePuntuacions" class="pie"></div>
+                <div id="llegendaPuntuacions" class="legend"></div>
+              </div>
+            </div>
+            <div class="pie-card">
+              <p class="muted">Quesito positives (4-5)</p>
+              <div class="pie-wrap">
+                <div id="piePositives" class="pie"></div>
+                <div id="llegendaPositives" class="legend"></div>
+              </div>
+            </div>
+          </div>
+
+          <h3>Comparativa de mitjana per grup</h3>
+          <div id="grafMitjanesGrup"></div>
+
+          <h3>Últimes respostes</h3>
+          <div id="llistatRespostes" class="list"></div>
+        </section>
+      </div>
+    </main>
+
+    <script>
+      // "Base de dades" simulada en memòria local
+      const respostes = [
+        { id: 1, grup: "DAW1A", puntuacio: 4, comentari: "Sessió clara i pràctica.", data: "2026-04-08T09:15:00" },
+        { id: 2, grup: "DAW1B", puntuacio: 5, comentari: "Molt útil per preparar el projecte.", data: "2026-04-08T10:40:00" },
+        { id: 3, grup: "ASIX1", puntuacio: 3, comentari: "Faltava més temps per practicar.", data: "2026-04-08T11:05:00" },
+        { id: 4, grup: "DAW1A", puntuacio: 2, comentari: "", data: "2026-04-08T12:20:00" },
+        { id: 5, grup: "DAW1B", puntuacio: 4, comentari: "Bona combinació de teoria i pràctica.", data: "2026-04-09T08:05:00" },
+        { id: 6, grup: "ASIX1", puntuacio: 5, comentari: "Explicacions molt clares.", data: "2026-04-09T08:30:00" },
+        { id: 7, grup: "DAW1A", puntuacio: 3, comentari: "Caldria més exemples guiats.", data: "2026-04-09T08:50:00" },
+        { id: 8, grup: "DAW1B", puntuacio: 4, comentari: "El ritme ha estat correcte.", data: "2026-04-09T09:10:00" },
+        { id: 9, grup: "ASIX1", puntuacio: 2, comentari: "Alguns conceptes no han quedat clars.", data: "2026-04-09T09:25:00" },
+        { id: 10, grup: "DAW1A", puntuacio: 5, comentari: "Activitat molt útil per l'examen.", data: "2026-04-09T09:45:00" },
+        { id: 11, grup: "DAW1B", puntuacio: 3, comentari: "M'agradaria més temps de laboratori.", data: "2026-04-09T10:00:00" },
+        { id: 12, grup: "ASIX1", puntuacio: 4, comentari: "Bon material de suport.", data: "2026-04-09T10:20:00" },
+        { id: 13, grup: "DAW1A", puntuacio: 5, comentari: "Genial per entendre l'analítica.", data: "2026-04-09T10:42:00" },
+        { id: 14, grup: "DAW1B", puntuacio: 2, comentari: "Sessió una mica densa.", data: "2026-04-09T11:05:00" },
+        { id: 15, grup: "ASIX1", puntuacio: 4, comentari: "Molt bona dinàmica de classe.", data: "2026-04-09T11:20:00" },
+        { id: 16, grup: "DAW1A", puntuacio: 3, comentari: "Faltaven més casos reals.", data: "2026-04-09T11:36:00" },
+        { id: 17, grup: "DAW1B", puntuacio: 5, comentari: "M'ha encantat la part pràctica.", data: "2026-04-09T11:55:00" },
+        { id: 18, grup: "ASIX1", puntuacio: 1, comentari: "No he pogut seguir bé la sessió.", data: "2026-04-09T12:12:00" },
+        { id: 19, grup: "DAW1A", puntuacio: 4, comentari: "Contingut ben estructurat.", data: "2026-04-09T12:28:00" },
+        { id: 20, grup: "DAW1B", puntuacio: 4, comentari: "", data: "2026-04-09T12:45:00" },
+        { id: 21, grup: "ASIX1", puntuacio: 5, comentari: "Molt aplicable al projecte final.", data: "2026-04-09T13:00:00" },
+        { id: 22, grup: "DAW1A", puntuacio: 2, comentari: "Hauria anat bé més feedback individual.", data: "2026-04-09T13:22:00" },
+        { id: 23, grup: "DAW1B", puntuacio: 3, comentari: "Sessió correcta.", data: "2026-04-09T13:40:00" },
+        { id: 24, grup: "ASIX1", puntuacio: 4, comentari: "Bon ritme a partir de la meitat.", data: "2026-04-09T14:05:00" },
+        { id: 25, grup: "DAW1A", puntuacio: 5, comentari: "Molt bona feina del professorat.", data: "2026-04-09T14:20:00" },
+        { id: 26, grup: "DAW1B", puntuacio: 1, comentari: "He tingut problemes tècnics tota l'hora.", data: "2026-04-09T14:40:00" },
+        { id: 27, grup: "ASIX1", puntuacio: 3, comentari: "Millorable però interessant.", data: "2026-04-09T14:58:00" },
+        { id: 28, grup: "DAW1A", puntuacio: 4, comentari: "Les demos han ajudat molt.", data: "2026-04-09T15:15:00" },
+        { id: 29, grup: "DAW1B", puntuacio: 5, comentari: "Repetiria aquest format de sessió.", data: "2026-04-09T15:36:00" },
+        { id: 30, grup: "ASIX1", puntuacio: 2, comentari: "Masses conceptes nous de cop.", data: "2026-04-09T15:55:00" },
+        { id: 31, grup: "DAW1A", puntuacio: 3, comentari: "Em va costar la part de gràfics.", data: "2026-04-09T16:08:00" },
+        { id: 32, grup: "DAW1B", puntuacio: 4, comentari: "Bona sessió, ben aprofitada.", data: "2026-04-09T16:25:00" },
+        { id: 33, grup: "ASIX1", puntuacio: 5, comentari: "He après molt avui.", data: "2026-04-09T16:41:00" },
+        { id: 34, grup: "DAW1A", puntuacio: 4, comentari: "La part de conclusions és interessant.", data: "2026-04-09T16:58:00" },
+        { id: 35, grup: "DAW1B", puntuacio: 2, comentari: "Necessito repassar la base.", data: "2026-04-09T17:12:00" },
+        { id: 36, grup: "ASIX1", puntuacio: 4, comentari: "Bon equilibri entre eines i teoria.", data: "2026-04-09T17:30:00" }
+      ];
+
+      const $ = (s) => document.querySelector(s);
+      const elGrup = $("#grup");
+      const elPuntuacio = $("#puntuacio");
+      const elComentari = $("#comentari");
+      const elFiltreGrup = $("#filtreGrup");
+      const elMissatgeError = $("#missatgeError");
+      const elBtnAfegir = $("#btnAfegir");
+      const elKpiTotal = $("#kpiTotal");
+      const elKpiMitjana = $("#kpiMitjana");
+      const elKpiPositives = $("#kpiPositives");
+      const elKpiTopGrup = $("#kpiTopGrup");
+      const elGrupActiu = $("#grupActiu");
+      const elGrafDistribucio = $("#grafDistribucio");
+      const elGrafMitjanesGrup = $("#grafMitjanesGrup");
+      const elPiePuntuacions = $("#piePuntuacions");
+      const elLlegendaPuntuacions = $("#llegendaPuntuacions");
+      const elPiePositives = $("#piePositives");
+      const elLlegendaPositives = $("#llegendaPositives");
+      const elLlistatRespostes = $("#llistatRespostes");
+
+      function validarFormulari() {
+        const valor = Number(elPuntuacio.value);
+        if (!Number.isInteger(valor) || valor < 1 || valor > 5) {
+          elMissatgeError.textContent = "La puntuació ha de ser un enter entre 1 i 5.";
+          return false;
+        }
+        elMissatgeError.textContent = "";
+        return true;
+      }
+
+      function calcularEstadistiques() {
+        const grupSeleccionat = elFiltreGrup.value;
+        const dadesFiltrades =
+          grupSeleccionat === "TOTS" ? respostes : respostes.filter((r) => r.grup === grupSeleccionat);
+        const total = dadesFiltrades.length;
+        if (total === 0) {
+          return {
+            total: 0,
+            mitjana: 0,
+            positives: 0,
+            topGrup: grupSeleccionat === "TOTS" ? "Tots els grups" : grupSeleccionat,
+            distribucio: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 },
+            perGrupGlobal: {}
+          };
+        }
+
+        let suma = 0;
+        let positives = 0;
+        const distribucio = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
+
+        for (const r of dadesFiltrades) {
+          suma += r.puntuacio;
+          distribucio[r.puntuacio] += 1;
+          if (r.puntuacio >= 4) positives += 1;
+        }
+
+        const perGrupGlobal = {};
+        for (const r of respostes) {
+          if (!perGrupGlobal[r.grup]) perGrupGlobal[r.grup] = { suma: 0, total: 0 };
+          perGrupGlobal[r.grup].suma += r.puntuacio;
+          perGrupGlobal[r.grup].total += 1;
+        }
+
+        return {
+          total,
+          mitjana: suma / total,
+          positives: (positives / total) * 100,
+          topGrup: grupSeleccionat === "TOTS" ? "Tots els grups" : grupSeleccionat,
+          distribucio,
+          perGrupGlobal
+        };
+      }
+
+      function renderDistribucio(distribucio, total) {
+        let html = "";
+        for (let i = 1; i <= 5; i += 1) {
+          const quantitat = distribucio[i];
+          const percentatge = total > 0 ? (quantitat / total) * 100 : 0;
+          html += `
+            <div class="chart-row">
+              <div class="chart-label"><span>${i} estrelles</span><strong>${quantitat}</strong></div>
+              <div class="bar"><span style="width:${percentatge.toFixed(1)}%"></span></div>
+            </div>
+          `;
+        }
+        elGrafDistribucio.innerHTML = html;
+      }
+
+      function renderQuesitoPuntuacions(distribucio, total) {
+        const colors = {
+          1: "#ef4444",
+          2: "#f97316",
+          3: "#f59e0b",
+          4: "#22c55e",
+          5: "#16a34a"
+        };
+
+        if (total === 0) {
+          elPiePuntuacions.style.background = "#e5e7eb";
+          elLlegendaPuntuacions.innerHTML = '<div class="legend-item">Sense dades</div>';
+          return;
+        }
+
+        let start = 0;
+        const segments = [];
+        let llegenda = "";
+
+        for (let i = 1; i <= 5; i += 1) {
+          const value = distribucio[i];
+          const pct = (value / total) * 100;
+          const end = start + pct;
+          segments.push(`${colors[i]} ${start.toFixed(2)}% ${end.toFixed(2)}%`);
+          llegenda += `
+            <div class="legend-item">
+              <span class="dot" style="background:${colors[i]}"></span>
+              <span>${i}/5: ${value} (${pct.toFixed(1)}%)</span>
+            </div>
+          `;
+          start = end;
+        }
+
+        elPiePuntuacions.style.background = `conic-gradient(${segments.join(", ")})`;
+        elLlegendaPuntuacions.innerHTML = llegenda;
+      }
+
+      function renderQuesitoPositives(positivesPercent) {
+        const positives = positivesPercent;
+        const negatives = 100 - positives;
+        elPiePositives.style.background = `conic-gradient(#16a34a 0% ${positives.toFixed(
+          2
+        )}%, #f59e0b ${positives.toFixed(2)}% 100%)`;
+
+        elLlegendaPositives.innerHTML = `
+          <div class="legend-item">
+            <span class="dot" style="background:#16a34a"></span>
+            <span>Positives (4-5): ${positives.toFixed(1)}%</span>
+          </div>
+          <div class="legend-item">
+            <span class="dot" style="background:#f59e0b"></span>
+            <span>No positives (1-3): ${negatives.toFixed(1)}%</span>
+          </div>
+        `;
+      }
+
+      function renderMitjanesPerGrup(perGrupGlobal) {
+        const grups = ["DAW1A", "DAW1B", "ASIX1"];
+        const grupSeleccionat = elFiltreGrup.value;
+        let html = "";
+
+        for (const grup of grups) {
+          const dada = perGrupGlobal[grup];
+          const mitjana = dada ? dada.suma / dada.total : 0;
+          const percentatge = (mitjana / 5) * 100;
+          html += `
+            <div class="chart-row">
+              <div class="chart-label">
+                <span>${grup}${grup === grupSeleccionat ? " (seleccionat)" : ""}</span>
+                <strong>${mitjana.toFixed(2)}/5</strong>
+              </div>
+              <div class="bar"><span style="width:${percentatge.toFixed(1)}%"></span></div>
+            </div>
+          `;
+        }
+        elGrafMitjanesGrup.innerHTML = html;
+      }
+
+      function classeGrup(grup) {
+        if (grup === "DAW1A") return "a";
+        if (grup === "DAW1B") return "b";
+        return "c";
+      }
+
+      function renderLlistat() {
+        const grupSeleccionat = elFiltreGrup.value;
+        const ultimes = [...respostes]
+          .filter((r) => grupSeleccionat === "TOTS" || r.grup === grupSeleccionat)
+          .sort((a, b) => (a.data < b.data ? 1 : -1));
+        elLlistatRespostes.innerHTML = ultimes
+          .map((r) => {
+            const comentari = r.comentari?.trim() || "Sense comentari";
+            return `
+              <article class="item score-${r.puntuacio}">
+                <span class="pill ${classeGrup(r.grup)}">${r.grup}</span>
+                <p><strong>Puntuació:</strong> ${r.puntuacio}/5</p>
+                <p><strong>Comentari:</strong> ${comentari}</p>
+              </article>
+            `;
+          })
+          .join("");
+      }
+
+      function render() {
+        const stats = calcularEstadistiques();
+        elGrupActiu.textContent = elFiltreGrup.value === "TOTS" ? "Tots els grups" : elFiltreGrup.value;
+        elKpiTotal.textContent = String(stats.total);
+        elKpiMitjana.textContent = stats.mitjana.toFixed(2);
+        elKpiPositives.textContent = `${stats.positives.toFixed(1)}%`;
+        elKpiTopGrup.textContent = stats.topGrup;
+        renderDistribucio(stats.distribucio, stats.total);
+        renderQuesitoPuntuacions(stats.distribucio, stats.total);
+        renderQuesitoPositives(stats.positives);
+        renderMitjanesPerGrup(stats.perGrupGlobal);
+        renderLlistat();
+      }
+
+      function afegirResposta() {
+        if (!validarFormulari()) return;
+
+        const nova = {
+          id: respostes.length + 1,
+          grup: elGrup.value,
+          puntuacio: Number(elPuntuacio.value),
+          comentari: elComentari.value.trim(),
+          data: new Date().toISOString()
+        };
+        respostes.push(nova);
+        elComentari.value = "";
+        render();
+      }
+
+      elBtnAfegir.addEventListener("click", afegirResposta);
+      elPuntuacio.addEventListener("input", validarFormulari);
+      elGrup.addEventListener("change", () => {
+        elFiltreGrup.value = elGrup.value;
+        render();
+      });
+      elFiltreGrup.addEventListener("change", render);
+
+      elFiltreGrup.value = elGrup.value;
+
+      render();
+    </script>
+  </body>
+</html>

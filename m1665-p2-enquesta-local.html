@@ -103,6 +103,10 @@
         font-weight: 700;
       }
 
+      .message.success {
+        color: var(--ok);
+      }
+
       .stats {
         display: grid;
         grid-template-columns: repeat(4, minmax(120px, 1fr));
@@ -309,7 +313,7 @@
             <textarea id="comentari" placeholder="Què milloraries de la sessió?"></textarea>
           </div>
 
-          <div id="missatgeError" class="message"></div>
+          <div id="missatgeError" class="message" aria-live="polite"></div>
           <button id="btnAfegir" type="button">Guardar resposta</button>
         </section>
 
@@ -424,13 +428,29 @@
       const elLlegendaPositives = $("#llegendaPositives");
       const elLlistatRespostes = $("#llistatRespostes");
 
+      function mostrarMissatge(text, tipus = "error") {
+        elMissatgeError.textContent = text;
+        elMissatgeError.classList.toggle("success", tipus === "success");
+        if (tipus !== "success") {
+          elMissatgeError.classList.remove("success");
+        }
+        if (text && tipus === "success") {
+          setTimeout(() => {
+            if (elMissatgeError.textContent === text) {
+              elMissatgeError.textContent = "";
+              elMissatgeError.classList.remove("success");
+            }
+          }, 4000);
+        }
+      }
+
       function validarFormulari() {
         const valor = Number(elPuntuacio.value);
         if (!Number.isInteger(valor) || valor < 1 || valor > 5) {
-          elMissatgeError.textContent = "La puntuació ha de ser un enter entre 1 i 5.";
+          mostrarMissatge("La puntuació ha de ser un enter entre 1 i 5.");
           return false;
         }
-        elMissatgeError.textContent = "";
+        mostrarMissatge("");
         return true;
       }
 
@@ -622,6 +642,7 @@
         respostes.push(nova);
         elComentari.value = "";
         render();
+        mostrarMissatge("Resposta guardada correctament.", "success");
       }
 
       elBtnAfegir.addEventListener("click", afegirResposta);
